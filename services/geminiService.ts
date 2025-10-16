@@ -28,7 +28,7 @@ Environment Style: Create a background scene that is ${style}. The phone should 
         `**PERFECT SCREEN FIT**: The user's screenshot MUST be displayed on the phone screen without any cropping, distortion, or letterboxing. It must perfectly fit the screen area, maintaining its original aspect ratio.`,
         `**ILLUMINATED SCREEN**: The screen should look like it is turned on and glowing, casting a subtle light on its immediate surroundings.`,
         `**REALISTIC PHONE**: The smartphone model should be modern and generic. Do not add any prominent logos. The phone itself should be integrated realistically into the scene with proper lighting and shadows.`,
-        `**OPTIMAL CAMERA ANGLE**: Use a natural, slightly elevated camera angle that clearly shows both the phone screen and the surrounding environment. The entire screenshot must be visible and legible.`,
+        `**OPTIMAL CAMERA ANGLE**: The camera angle is critical. It MUST be a slightly elevated, natural view that clearly shows the entire phone screen. The entire screenshot must be visible and legible. Extreme low or high angles that distort the view or hide the screen are forbidden. The final image must look like a professional product photo focused on the device.`,
         `**BACKGROUND COMPOSITION**: The background should be clean, uncluttered, and perfectly match the requested '${style}' theme.`
       );
 
@@ -62,7 +62,7 @@ Environment Style: Create a background scene that is ${style}.
         `**ABSOLUTE COLOR FIDELITY**: The user's design (the ${fullDesignType}) MUST retain its original colors perfectly. Do NOT, under any circumstances, apply color filters, tints, or color grading from the environment's style (e.g., no sepia/yellow tint for a vintage style) to the user's design. The design's colors are non-negotiable and must be an exact match to the input image.`,
         `**PERFECT CONTENT REPRODUCTION**: All text, logos, and graphics from the user's design must be rendered with perfect clarity and accuracy. No distortion, no changes.`,
         `**REALISTIC INTEGRATION**: The user's design should be realistically integrated into the scene. This means accurate perspective, lighting, and shadows *on* the object. For example, if there's a light source from the left, the left side of the book might be brighter and it might cast a shadow to the right. This is acceptable, but the *base colors* of the book itself must not change.`,
-        `**OPTIMAL CAMERA ANGLE**: Prioritize the visibility and legibility of the design's content. Use a natural, slightly elevated camera angle (like a three-quarters view). Avoid low angles that cause perspective distortion and obscure the design's details. The goal is a clear, professional product photograph, not a flat, top-down scan.`,
+        `**OPTIMAL CAMERA ANGLE**: The camera angle is critical. It MUST be a slightly elevated, professional three-quarters view. This angle ensures the entire design is clearly visible and legible. Low angles that hide content are forbidden. A flat, top-down "scanner" view is also forbidden. The final image must look like a professional product photo where the design is the hero.`,
         `**BACKGROUND COMPOSITION**: The background should be clean, uncluttered, and perfectly match the requested '${style}' theme.`
       );
 
