@@ -1,10 +1,10 @@
-
 import React from 'react';
 
 interface MockupDisplayProps {
   mockupUrl: string | null;
   isLoading: boolean;
   error: string | null;
+  downloadFilename?: string;
 }
 
 const LoadingSpinner: React.FC = () => (
@@ -28,7 +28,7 @@ const Placeholder: React.FC = () => (
     </div>
 );
 
-const MockupDisplay: React.FC<MockupDisplayProps> = ({ mockupUrl, isLoading, error }) => {
+const MockupDisplay: React.FC<MockupDisplayProps> = ({ mockupUrl, isLoading, error, downloadFilename }) => {
   return (
     <div className="w-full h-full bg-gray-900/50 rounded-lg flex items-center justify-center p-4 min-h-[400px] lg:min-h-0">
       <div className="w-full h-full border-2 border-dashed border-gray-700 rounded-lg flex items-center justify-center">
@@ -40,7 +40,22 @@ const MockupDisplay: React.FC<MockupDisplayProps> = ({ mockupUrl, isLoading, err
             <p>{error}</p>
           </div>
         ) : mockupUrl ? (
-          <img src={mockupUrl} alt="Generated Mockup" className="max-w-full max-h-full object-contain rounded-md shadow-2xl" />
+          <div className="relative w-full h-full group flex items-center justify-center">
+            <img src={mockupUrl} alt="Generated Mockup" className="max-w-full max-h-full object-contain rounded-md shadow-2xl" />
+            {downloadFilename && (
+              <a
+                href={mockupUrl}
+                download={downloadFilename}
+                className="absolute top-4 right-4 bg-indigo-600 text-white p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform hover:scale-110"
+                title="Download Mockup"
+                aria-label="Download Mockup"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+              </a>
+            )}
+          </div>
         ) : (
           <Placeholder />
         )}
