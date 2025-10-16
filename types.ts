@@ -1,6 +1,7 @@
 export enum ImageType {
   COVER = 'cover',
   SPREAD = 'spread',
+  MOBILE_SCREEN = 'mobile screen',
 }
 
 export enum DesignType {

@@ -7,41 +7,77 @@ export const generateMockup = async (
   base64ImageData: string,
   mimeType: string,
   imageType: ImageType,
-  designType: DesignType,
+  designType: DesignType | null, // Can be null for mobile
   style: MockupStyle,
   continuityImageBase64?: string
 ): Promise<string> => {
   try {
-    const fullDesignType = `${designType} ${imageType}`;
+    let prompt = '';
+    const instructions: string[] = [];
     
-    // Base prompt
-    let prompt = `Task: Create a photorealistic mockup by placing the user's provided design into a styled environment.
+    if (imageType === ImageType.MOBILE_SCREEN) {
+      // --- MOBILE PROMPT LOGIC ---
+      prompt = `Task: Create a photorealistic mockup by placing the user's provided mobile screenshot onto a smartphone screen within a styled environment.
+
+User's Design: An image of a mobile phone screenshot.
+Environment Style: Create a background scene that is ${style}. The phone should be resting naturally within this scene (e.g., on a table, held by a hand if appropriate for the style).
+
+**CORE CONCEPT**: You are placing a digital screen onto a physical phone. The phone exists in a real, photorealistic scene. The screenshot must look like it's being displayed on an illuminated screen.`;
+
+      instructions.push(
+        `**PERFECT SCREEN FIT**: The user's screenshot MUST be displayed on the phone screen without any cropping, distortion, or letterboxing. It must perfectly fit the screen area, maintaining its original aspect ratio.`,
+        `**ILLUMINATED SCREEN**: The screen should look like it is turned on and glowing, casting a subtle light on its immediate surroundings.`,
+        `**REALISTIC PHONE**: The smartphone model should be modern and generic. Do not add any prominent logos. The phone itself should be integrated realistically into the scene with proper lighting and shadows.`,
+        `**OPTIMAL CAMERA ANGLE**: Use a natural, slightly elevated camera angle that clearly shows both the phone screen and the surrounding environment. The entire screenshot must be visible and legible.`,
+        `**BACKGROUND COMPOSITION**: The background should be clean, uncluttered, and perfectly match the requested '${style}' theme.`
+      );
+
+      if (continuityImageBase64) {
+        prompt = `Task: Create a photorealistic mobile mockup that matches a previous scene.
+
+User's Design: The FIRST image provided is a mobile screenshot.
+Reference Scene: The SECOND image provided is the scene you MUST replicate (a phone in an environment).
+
+**CORE CONCEPT**: You are placing a new screenshot onto the screen of the exact same phone in the exact same scene as the Reference Scene. The lighting, phone model, and environment are defined by the Reference Scene.`;
+
+        instructions.unshift(
+          `**SCENE REPLICATION**: You MUST use the second image (Reference Scene) as a strict guide. Match the phone model, its position, the background, surface, props, lighting, shadows, and camera angle of the Reference Scene perfectly. The new mockup should look like the screen content has just changed.`
+        );
+      }
+    } else {
+      // --- EXISTING PRINT PROMPT LOGIC ---
+      if (!designType) {
+        throw new Error("Design type (Book or Brochure) is required for print mockups.");
+      }
+      const fullDesignType = `${designType} ${imageType}`;
+      
+      prompt = `Task: Create a photorealistic mockup by placing the user's provided design into a styled environment.
 
 User's Design: ${continuityImageBase64 ? "The FIRST image provided is" : "An image of"} a ${fullDesignType}.
 Environment Style: Create a background scene that is ${style}.
 
 **CORE CONCEPT**: You are placing a real, physical object (the user's design) into a photorealistic scene. The scene has lighting and a style, but the physical object itself does NOT change color. It should look like a brand new, freshly printed item.`;
 
-    // Instructions array
-    const instructions = [
-      `**ABSOLUTE COLOR FIDELITY**: The user's design (the ${fullDesignType}) MUST retain its original colors perfectly. Do NOT, under any circumstances, apply color filters, tints, or color grading from the environment's style (e.g., no sepia/yellow tint for a vintage style) to the user's design. The design's colors are non-negotiable and must be an exact match to the input image.`,
-      `**PERFECT CONTENT REPRODUCTION**: All text, logos, and graphics from the user's design must be rendered with perfect clarity and accuracy. No distortion, no changes.`,
-      `**REALISTIC INTEGRATION**: The user's design should be realistically integrated into the scene. This means accurate perspective, lighting, and shadows *on* the object. For example, if there's a light source from the left, the left side of the book might be brighter and it might cast a shadow to the right. This is acceptable, but the *base colors* of the book itself must not change.`,
-      `**BACKGROUND COMPOSITION**: The background should be clean, uncluttered, and perfectly match the requested '${style}' theme.`
-    ];
+      instructions.push(
+        `**ABSOLUTE COLOR FIDELITY**: The user's design (the ${fullDesignType}) MUST retain its original colors perfectly. Do NOT, under any circumstances, apply color filters, tints, or color grading from the environment's style (e.g., no sepia/yellow tint for a vintage style) to the user's design. The design's colors are non-negotiable and must be an exact match to the input image.`,
+        `**PERFECT CONTENT REPRODUCTION**: All text, logos, and graphics from the user's design must be rendered with perfect clarity and accuracy. No distortion, no changes.`,
+        `**REALISTIC INTEGRATION**: The user's design should be realistically integrated into the scene. This means accurate perspective, lighting, and shadows *on* the object. For example, if there's a light source from the left, the left side of the book might be brighter and it might cast a shadow to the right. This is acceptable, but the *base colors* of the book itself must not change.`,
+        `**OPTIMAL CAMERA ANGLE**: Prioritize the visibility and legibility of the design's content. Use a natural, slightly elevated camera angle (like a three-quarters view). Avoid low angles that cause perspective distortion and obscure the design's details. The goal is a clear, professional product photograph, not a flat, top-down scan.`,
+        `**BACKGROUND COMPOSITION**: The background should be clean, uncluttered, and perfectly match the requested '${style}' theme.`
+      );
 
-    if (continuityImageBase64) {
-      prompt = `Task: Create a photorealistic mockup that matches a previous scene.
+      if (continuityImageBase64) {
+        prompt = `Task: Create a photorealistic mockup that matches a previous scene.
 
 User's Design: The FIRST image provided is a ${fullDesignType}.
 Reference Scene: The SECOND image provided is the scene you MUST replicate.
 
 **CORE CONCEPT**: You are placing a real, physical object (the user's design) into the exact same scene as the Reference Scene. The lighting and style are defined by the Reference Scene, but the physical object itself does NOT change color. It should look like a brand new, freshly printed item that has replaced the item in the original photo.`;
-      
-      // Prepend continuity instruction to make it the top priority
-      instructions.unshift(
-        `**SCENE REPLICATION**: You MUST use the second image (Reference Scene) as a strict guide for the new mockup's environment. Match the background, surface, props, lighting, shadows, and camera angle of the Reference Scene perfectly. The new mockup should look like it was photographed in the exact same location.`
-      );
+        
+        instructions.unshift(
+          `**SCENE REPLICATION**: You MUST use the second image (Reference Scene) as a strict guide for the new mockup's environment. Match the background, surface, props, lighting, shadows, and camera angle of the Reference Scene perfectly. The new mockup should look like it was photographed in the exact same location.`
+        );
+      }
     }
     
     prompt += `\n\n**CRITICAL RULES**:\n1. ${instructions.join('\n2. ')}`;
@@ -54,7 +90,6 @@ Reference Scene: The SECOND image provided is the scene you MUST replicate.
     if (continuityImageBase64) {
       parts.push({
         inlineData: {
-          // Assuming continuity image is also png/jpeg from the app's output
           data: continuityImageBase64,
           mimeType: 'image/png', 
         },
@@ -73,7 +108,6 @@ Reference Scene: The SECOND image provided is the scene you MUST replicate.
 
     const candidate = response.candidates?.[0];
 
-    // Happy path: image is generated and present
     if (candidate?.content?.parts) {
       for (const part of candidate.content.parts) {
         if (part.inlineData) {
@@ -82,7 +116,6 @@ Reference Scene: The SECOND image provided is the scene you MUST replicate.
       }
     }
 
-    // Unhappy path: something went wrong, let's find out what.
     console.error("Invalid response from Gemini API:", JSON.stringify(response, null, 2));
 
     const blockReason = response.promptFeedback?.blockReason;

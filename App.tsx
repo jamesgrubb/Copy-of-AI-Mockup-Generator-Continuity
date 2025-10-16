@@ -65,7 +65,11 @@ const App: React.FC = () => {
       const img = new Image();
       img.onload = () => {
         const aspectRatio = img.width / img.height;
-        if (aspectRatio > 1.2) { // Landscape-like
+        // Check for tall, portrait aspect ratios typical of mobile screenshots
+        if (aspectRatio < 0.6) { // e.g., 9:16 is 0.5625
+          setImageType(ImageType.MOBILE_SCREEN);
+          setSelectedDesignType(null); // Not applicable for mobile
+        } else if (aspectRatio > 1.2) { // Landscape-like
           setImageType(ImageType.SPREAD);
         } else { // Portrait or square
           setImageType(ImageType.COVER);
@@ -99,11 +103,14 @@ const App: React.FC = () => {
       triggerToast("Please upload an image first.");
       return;
     }
-    if (!imageType || !selectedDesignType) {
-      triggerToast("Please select the design type (Book/Brochure).");
+    
+    const isPrintMaterial = imageType === ImageType.COVER || imageType === ImageType.SPREAD;
+    if (isPrintMaterial && !selectedDesignType) {
+      triggerToast("Please select if this is a Book or Brochure.");
       return;
     }
-     if (showContinuityPrompt && useContinuity === null) {
+
+    if (showContinuityPrompt && useContinuity === null) {
       triggerToast("Please make a choice regarding scene continuity.");
       return;
     }
@@ -125,7 +132,7 @@ const App: React.FC = () => {
       const generatedImageBase64 = await generateMockup(
         base64Image,
         mimeType,
-        imageType,
+        imageType!,
         selectedDesignType,
         selectedStyle,
         continuityImageBase64
@@ -185,8 +192,9 @@ const App: React.FC = () => {
     }
   };
   
+  const isPrintMaterial = imageType === ImageType.COVER || imageType === ImageType.SPREAD;
   const isGenerateDisabled = !uploadedFile 
-    || !selectedDesignType 
+    || (isPrintMaterial && !selectedDesignType) 
     || isLoading 
     || isRepairing 
     || (showContinuityPrompt && useContinuity === null);
@@ -210,7 +218,7 @@ const App: React.FC = () => {
                 onSelectChoice={handleContinuitySelection}
               />
             )}
-            {imageType && (
+            {imageType && isPrintMaterial && (
               <DesignTypeSelector 
                 selectedType={selectedDesignType}
                 onSelectType={setSelectedDesignType}
@@ -221,7 +229,7 @@ const App: React.FC = () => {
               styles={MOCKUP_STYLES}
               selectedStyle={selectedStyle}
               onStyleSelect={setSelectedStyle}
-              disabled={!uploadedFile || !selectedDesignType || useContinuity === true || (showContinuityPrompt && useContinuity === null)}
+              disabled={!uploadedFile || (isPrintMaterial && !selectedDesignType) || useContinuity === true || (showContinuityPrompt && useContinuity === null)}
             />
             <div className="flex flex-col gap-4">
               <button
@@ -277,7 +285,7 @@ const App: React.FC = () => {
              <MockupDisplay 
                 mockupUrl={generatedMockup}
                 isLoading={isLoading || isRepairing}
-                error={error}
+                error={null} // Errors are now handled by toast
                 downloadFilename={downloadFilename}
              />
           </div>
