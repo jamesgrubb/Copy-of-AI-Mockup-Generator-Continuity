@@ -1,0 +1,5 @@
+{
+  "name": "Copy of AI Mockup Generator Continuity",
+  "description": "An AI-powered tool to generate beautiful, photorealistic mockups from your uploaded images. The AI detects the image type and applies a selected style, focusing on realism, accurate lighting, and high fidelity to the original.",
+  "requestFramePermissions": []
+}
